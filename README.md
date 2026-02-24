@@ -1,5 +1,5 @@
 
-# DS2025_30644_Adascalitei_Andra_Assignment1
+# Energy Management System
 
 This project implements an **Energy Management System (EMS)** using a **microservices architecture**.  
 It is containerized with **Docker** and exposed via a **Traefik API Gateway**.  
