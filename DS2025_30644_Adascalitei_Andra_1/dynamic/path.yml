@@ -1,0 +1,109 @@
+http:
+  # Define URL routing rules, middlewares, and services
+  routers:
+    frontend:
+      rule: "Host(`localhost`)"
+      entryPoints:
+        - web
+      service: frontend-service
+
+    user-router:
+      rule: "Host(`localhost`) && PathPrefix(`/users`)"
+      entryPoints:
+        - web
+      service: user-service
+      #middlewares:
+       # - auth-basic
+
+    device-router:
+      rule: "Host(`localhost`) && PathPrefix(`/devices`)"
+      entryPoints:
+        - web
+      service: device-service
+     # middlewares:
+      #  - auth-basic
+
+    auth-router:
+      rule: "Host(`localhost`) && PathPrefix(`/auth`)"
+      entryPoints:
+        - web
+      service: auth-service
+     # middlewares:
+      #  - auth-basic
+
+    monitoring-router:
+      rule: "Host(`localhost`) && PathPrefix(`/monitoring`)"
+      entryPoints:
+        - web
+      service: monitoring-service
+      middlewares:
+        - monitoring-strip-prefix
+     # - auth-basic
+
+    websocket-router:
+      rule: "Host(`localhost`) && PathPrefix(`/ws`)"
+      entryPoints:
+        - web
+      service: websocket-service
+      middlewares:
+        - websocket-headers
+
+    customer-support-router:
+      rule: "Host(`localhost`) && PathPrefix(`/api/support`)"
+      entryPoints:
+        - web
+      service: customer-support-service
+
+  middlewares:
+    monitoring-strip-prefix:
+      stripPrefix:
+        prefixes:
+          - "/monitoring"
+    
+    websocket-headers:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Proto: "http"
+        customResponseHeaders:
+          X-Frame-Options: "SAMEORIGIN"
+   # auth-basic: # Middleware for basic authentication
+   #   basicAuth:
+   #     users:
+   #       - "user:$apr1$H6uskkkW$IgXLP6ewTrSuBkTrqE8wj/" # password = "test"
+
+
+  services:
+    frontend-service:
+      loadBalancer:
+        servers:
+          - url: "http://frontend:80"
+
+    user-service:
+      loadBalancer:
+        servers:
+          - url: "http://user-microservice:8081"
+
+    device-service:
+      loadBalancer:
+        servers:
+          - url: "http://device-microservice:8082" # Container name solved by Docker DNS
+
+    auth-service:
+      loadBalancer:
+        servers:
+          - url: "http://auth-microservice:8083"
+
+    monitoring-service:
+      loadBalancer:
+        servers:
+          - url: "http://monitoring-microservice:8084"
+
+    websocket-service:
+      loadBalancer:
+        servers:
+          - url: "http://websocket-microservice:8085"
+
+    customer-support-service:
+      loadBalancer:
+        servers:
+          - url: "http://customer-support-microservice:8086"

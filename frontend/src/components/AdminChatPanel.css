@@ -1,0 +1,102 @@
+.admin-chat-panel {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin: 20px 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.admin-chat-panel h4 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.admin-chat-panel p {
+    margin: 5px 0;
+    color: #666;
+}
+
+.admin-chat-panel button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.2s ease;
+}
+
+.admin-chat-panel button:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+.admin-chat-panel button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.admin-chat-panel .message {
+    margin-bottom: 10px;
+}
+
+.admin-chat-panel .user-message {
+    background-color: #e3f2fd;
+    border-left: 4px solid #2196f3;
+}
+
+.admin-chat-panel .bot-message {
+    background-color: #fff3e0;
+    border-left: 4px solid #ff9800;
+}
+
+.admin-chat-panel .admin-message {
+    background-color: #e8f5e8;
+    border-left: 4px solid #4caf50;
+}
+
+.admin-chat-panel .session-item {
+    transition: all 0.2s ease;
+}
+
+.admin-chat-panel .session-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.admin-chat-panel .chat-input textarea {
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.admin-chat-panel .chat-input textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.admin-chat-panel .status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.admin-chat-panel .status-waiting {
+    background-color: #ffc107;
+    color: #856404;
+}
+
+.admin-chat-panel .status-active {
+    background-color: #28a745;
+    color: white;
+}
+
+.admin-chat-panel .status-admin-active {
+    background-color: #17a2b8;
+    color: white;
+}

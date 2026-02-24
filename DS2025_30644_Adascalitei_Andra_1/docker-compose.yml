@@ -1,0 +1,330 @@
+services:
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:80"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    networks:
+      - proxy-network
+
+  user-db:
+    image: mysql:latest
+    container_name: user-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: user_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3308:3306"
+    volumes:
+      - user-db-data:/var/lib/mysql
+    deploy:
+      resources:
+        limits:
+          memory: 350M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "user", "-ppassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - proxy-network
+
+  device-db:
+    image: mysql:latest
+    container_name: device-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: device_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3309:3306"
+    volumes:
+      - device-db-data:/var/lib/mysql
+    deploy:
+      resources:
+        limits:
+          memory: 350M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "user", "-ppassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - proxy-network
+
+  auth-db:
+    image: mysql:latest
+    container_name: auth-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: auth_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3310:3306"
+    volumes:
+      - auth-db-data:/var/lib/mysql
+    deploy:
+      resources:
+        limits:
+          memory: 350M
+    networks:
+      - proxy-network
+
+  monitoring-db:
+    image: mysql:latest
+    container_name: monitoring-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: monitoring_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3311:3306"
+    volumes:
+      - monitoring-db-data:/var/lib/mysql
+    deploy:
+      resources:
+        limits:
+          memory: 350M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "user", "-ppassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - proxy-network
+
+  customersupport-db:
+    image: mysql:latest
+    container_name: customersupport-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: customersupportdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3312:3306"
+    volumes:
+      - customersupport-db-data:/var/lib/mysql
+    deploy:
+      resources:
+        limits:
+          memory: 350M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "user", "-ppassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - proxy-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    deploy:
+      resources:
+        limits:
+          memory: 400M
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - proxy-network
+
+  user-microservice:
+    build:
+      context: ./DS2025_30644_Adascalitei_Andra_UserMicroservice
+      dockerfile: Dockerfile
+    container_name: user-microservice
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://user-db:3306/user_db
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=user
+      - SPRING_RABBITMQ_PASSWORD=password
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    depends_on:
+      - user-db
+      - rabbitmq
+    networks:
+      - proxy-network
+
+  device-microservice:
+    build:
+      context: ./DS2025_30644_Adascalitei_Andra_DeviceMicroservice
+      dockerfile: Dockerfile
+    container_name: device-microservice
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://device-db:3306/device_db
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=user
+      - SPRING_RABBITMQ_PASSWORD=password
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    depends_on:
+      - device-db
+      - rabbitmq
+    networks:
+      - proxy-network
+
+  auth-microservice:
+    build:
+      context: ./DS2025_30644_Adascalitei_Andra_AuthorizationMicroservice
+      dockerfile: Dockerfile
+    container_name: auth-microservice
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://auth-db:3306/auth_db
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    depends_on:
+      - auth-db
+    networks:
+      - proxy-network
+
+  monitoring-microservice:
+    build:
+      context: ./MonitoringService
+      dockerfile: Dockerfile
+    container_name: monitoring-microservice
+    restart: on-failure
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://monitoring-db:3306/monitoring_db
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=user
+      - SPRING_RABBITMQ_PASSWORD=password
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    depends_on:
+      - monitoring-db
+      - rabbitmq
+    networks:
+      - proxy-network
+
+  websocket-microservice:
+    build:
+      context: ./WebSocketMicroservice
+      dockerfile: Dockerfile
+    container_name: websocket-microservice
+    restart: on-failure
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=user
+      - SPRING_RABBITMQ_PASSWORD=password
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    depends_on:
+      - rabbitmq
+    networks:
+      - proxy-network
+
+  customer-support-microservice:
+    build:
+      context: ./CustomerSupportMicroservice
+      dockerfile: Dockerfile
+    container_name: customer-support-microservice
+    restart: on-failure
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://customersupport-db:3306/customersupportdb
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=user
+      - SPRING_RABBITMQ_PASSWORD=password
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    depends_on:
+      customersupport-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - proxy-network
+
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: always
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./traefik.yml:/etc/traefik/traefik.yml:ro"
+      - "./dynamic:/etc/traefik/dynamic:ro"
+      - "./logs:/var/log/traefik"
+    deploy:
+      resources:
+        limits:
+          memory: 150M
+    networks:
+      - proxy-network
+
+volumes:
+  user-db-data:
+  device-db-data:
+  auth-db-data:
+  monitoring-db-data:
+  customersupport-db-data:
+
+networks:
+  proxy-network:
+    driver: bridge
